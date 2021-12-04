@@ -19,11 +19,12 @@ def gen_inf_extractor(soup):
 
     gen_inf_raw = soup.find_all("tr")[header_ind[0] + 1]
 
-    try:
-        male_ratio_raw = gen_inf_raw.find_all("td", class_ = "fooinfo")[3].get_text()
-        male_ratio = male_ratio_raw.split('%')[0].split(':')[1]
-    except IndexError:
+    male_ratio_raw = gen_inf_raw.find_all("td", class_ = "fooinfo")[3].get_text()
+
+    if "Genderless" in male_ratio_raw:
         male_ratio = -100.0
+    else:
+        male_ratio = male_ratio_raw.split('%')[0].split(':')[1]
 
     types = []
     types_raw_list = gen_inf_raw.find_all("img")
@@ -51,7 +52,7 @@ def phys_inf_extractor(soup):
     classification = phys_inf_raw[0].get_text()
     height = (phys_inf_raw[1].get_text()).split("\t")[-1].split("m")[0]
     weight = (phys_inf_raw[2].get_text()).split("\t")[-1].split("kg")[0]
-    capture_rate = phys_inf_raw[3].get_text()
+    capture_rate = phys_inf_raw[3].get_text().split(" ")[0]
     base_egg_steps = (phys_inf_raw[4].get_text()).replace(",", "")
 
     phys_inf = pd.DataFrame(columns = ["classification", "base_egg_steps",
@@ -130,3 +131,21 @@ def stats_extractor(soup):
                          int(base_stats_raw[6].get_text())]
 
     return base_stats
+
+
+def full_extractor(soup):
+    gen_inf = gen_inf_extractor(soup)
+    phys_inf = phys_inf_extractor(soup)
+    ment_inf = ment_inf_extractor(soup)
+    abilities = abilities_extractor(soup)
+    weaknesses = weaknesses_extractor(soup)
+    stats = stats_extractor(soup)
+
+    return pd.concat([gen_inf, 
+                      phys_inf,
+                      ment_inf,
+                      abilities, 
+                      weaknesses, 
+                      stats],
+                    axis = 1)
+
