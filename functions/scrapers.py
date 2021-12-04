@@ -18,9 +18,9 @@ def create_gen_1to7_list(page = requests.get("https://serebii.net/pokedex-sm/"))
 
         temp_list['number'] = [item.get_text().split(' ')[0] for item
                                in pokemon_raw_list]
-
-        temp_list['name'] = [item.get_text().split(' ', 1)[1].strip(" ") for item
-                             in pokemon_raw_list]
+        
+        temp_list['name'] = ["".join(item.get_text().split(' ', 1)[1].splitlines()).strip(" ")
+                             for item in pokemon_raw_list]
 
         pokemon_list = pd.concat([pokemon_list, temp_list], axis = 0)
 
