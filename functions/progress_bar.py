@@ -1,5 +1,4 @@
 import math
-import time
 
 class ProgressBar:
     def __init__(self, total_pokemon, current_pokename, current_pokenumber, bar_size):
