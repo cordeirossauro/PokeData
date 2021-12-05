@@ -2,6 +2,7 @@ import time
 import random
 import os
 import sys
+import argparse
 
 import importlib
 from bs4 import BeautifulSoup
@@ -11,55 +12,90 @@ import pandas as pd
 try:
     sys.path.append("functions")
     import scrapers as scrp
-    import extractors as ext
-    import progress_bar as pb
+    import crawler as crwl
 except ModuleNotFoundError:
     print("Could not find the necessary functions inside their folder...")
-    time.sleep(1)
     sys.exit()
 
 
-def pokecrawler(pokelist, verbose = 1):
-    if verbose == 1:
-        total_pokemon = str(len(pokelist))
-        print(f"Looks like there's {total_pokemon} pokemon to read in the website...")
-        time.sleep(1)
-        print("Our Spinaraks will start going through them now!\n")
-        time.sleep(1)
-        progress_bar = pb.ProgressBar(total_pokemon = total_pokemon,
-                                      current_pokename = "-", 
-                                      current_pokenumber = 0, 
-                                      bar_size = 30)
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--create", 
+                        help = "create a new pokedex and fill it", 
+                        action = "store_true")
+    parser.add_argument("-f", "--fill", 
+                        help = "fill the existing pokedex", 
+                        action = "store_true")
+    parser.add_argument("-l", "--lookup",
+                        help = "look up an entry in the local pokedex",
+                        type = int,
+                        action = "store",
+                        required = False,
+                        metavar = "pokemon_number",
+                        dest = "number")
 
-    index = 1
-    for number in pokelist.index:
-        if verbose == 1:
-            name = pokelist.loc[number]["name"]
-            progress_bar.update_bar(current_pokename = name, current_pokenumber = index)
+    args = parser.parse_args()
 
-        pokesoup = scrp.scrape_pokesoup(pokelist.loc[number]["link"])
+    args_given = sum(bool(e) for e in vars(args).values())
 
-        pokedata = ext.full_extractor(pokesoup)
-        pokedata["number"] = number
-        pokedata.set_index("number", inplace = True)
+    if args_given == 0:
+        print("No action requested, check --help to see the available ones...")
+        exit()
+    elif args_given > 1:
+        print("The code can only perform one action at a time.")
+        exit()
+    else:
+        return args
 
-        pokedex_entry = pd.concat([pokelist.loc[[number]], pokedata], axis = 1)
 
-        if index == 1:
-            pokedex_entry.drop("link", axis = 1).to_csv("data/pokedex.csv")
+def create_pokedex():
+    pokelist = scrp.get_pokelist()
+    os.makedirs("data", exist_ok = True)
+    crwl.pokecrawler(pokelist, fill = False, verbose = True)
+
+
+def fill_pokedex():
+    pokelist = scrp.get_pokelist()
+    try:
+        current_pokedex = pd.read_csv("data/pokedex.csv", 
+                                    usecols = ["number", "name"],
+                                    dtype = {"number": str})
+        current_pokedex.set_index("number", inplace = True)
+
+        pokelist = pokelist.loc[[(number not in current_pokedex.index) for number in pokelist.index]]
+        if len(pokelist) == 0:
+            print("Looks like your pokedex is already complete, well done!")
         else:
-            pokedex_entry.drop("link", axis = 1).to_csv("data/pokedex.csv", mode = "a", header = False)
+            crwl.pokecrawler(pokelist, fill = True, verbose = True)
+    except FileNotFoundError:
+        print("No pokedex available to fill, try creating one by using the -c option")
 
-        time.sleep(random.randint(1, 5))
-        index = index + 1
 
-    print("All set! Your pokedex is complete, and can be found inside the data folder")
+def check_pokedex(number):
+    if number > 0:
+        try:
+            print("Checking your pokedex for pokemon number " + f"{args.number:03d}" + "...")
+            columns = pd.read_csv("data/pokedex.csv", nrows = 0).columns
+            pokedata = pd.read_csv("data/pokedex.csv", skiprows = number - 1, nrows = 1)
+            pokedata.columns = columns
+            pokedata.set_index("number", inplace = True)
+            pokedata["type"] = "/".join([pokedata["type1"].values[0], pokedata["type2"].values[0]])
+            print(pokedata[['generation', 'name', 'type', 'HP', 'attack', 
+                            'defense', 'sp_attack', 'sp_defense', 'speed']])
+        except FileNotFoundError:
+            print("No pokedex available to fill, try creating one by using the -c option")
+        except pd.errors.EmptyDataError:
+            print("Entry not found in your pokedex")
+    else:
+        print("Invalid pokemon number")
 
 
 if __name__ == "__main__":
-    gen_1to7_list = scrp.create_gen_1to7_list()
-    gen_8_list = scrp.create_gen_8_list()
-    pokelist = pd.concat([gen_1to7_list, gen_8_list], axis = 0)
+    args = get_args()
     
-    os.makedirs("data", exist_ok = True)
-    pokecrawler(pokelist)
+    if args.fill is True:
+        fill_pokedex()
+    elif args.create is True:
+        create_pokedex()
+    elif args.number is not None:
+        check_pokedex(args.number)
