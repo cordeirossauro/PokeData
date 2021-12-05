@@ -74,7 +74,6 @@ def fill_pokedex():
 def check_pokedex(number):
     if number > 0:
         try:
-            print("Checking your pokedex for pokemon number " + f"{args.number:03d}" + "...")
             columns = pd.read_csv("data/pokedex.csv", nrows = 0).columns
             pokedata = pd.read_csv("data/pokedex.csv", skiprows = number - 1, nrows = 1)
             pokedata.columns = columns
