@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import pandas as pd
+import re
 
 def find_string(soup, string, tag):
     i = 0
@@ -24,7 +25,7 @@ def gen_inf_extractor(soup):
     if "Genderless" in male_ratio_raw:
         male_ratio = -100.0
     else:
-        male_ratio = male_ratio_raw.split('%')[0].split(':')[1]
+        male_ratio = re.findall(r"\d+", male_ratio_raw)[0]
 
     types = []
     types_raw_list = gen_inf_raw.find_all("img")
@@ -148,4 +149,3 @@ def full_extractor(soup):
                       weaknesses, 
                       stats],
                     axis = 1)
-
