@@ -45,9 +45,18 @@ def get_args():
 
 
 def create_pokedex():
-    pokelist = scrp.get_pokelist()
-    os.makedirs("data", exist_ok = True)
-    crwl.pokecrawler(pokelist, fill = False, verbose = True)
+    if os.path.exists("data/pokedex.csv"):
+        choice = input("There's already a pokedex file inside your data folder." \
+                        " If you continue, your file will be overwritten." \
+                        "\nDo you want to continue? (y/n) ")
+        if choice == "y":
+            pokelist = scrp.get_pokelist()
+            os.makedirs("data", exist_ok = True)
+            crwl.pokecrawler(pokelist, fill = False, verbose = True)
+    else:
+        pokelist = scrp.get_pokelist()
+        os.makedirs("data", exist_ok = True)
+        crwl.pokecrawler(pokelist, fill = False, verbose = True)
 
 
 def fill_pokedex():
