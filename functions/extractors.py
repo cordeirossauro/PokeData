@@ -121,8 +121,8 @@ def base_stats_extractor(soup):
 
     base_stats_raw = soup.find_all("tr")[header_ind[0]].find_all("td")
 
-    base_stats = pd.DataFrame(columns = ["HP", "attack", "defense", "sp_attack",
-                                         "sp_defense", "speed"])
+    base_stats = pd.DataFrame(columns = ["base_HP", "base_attack", "base_defense",
+                                         "base_sp_attack", "base_sp_defense", "base_speed"])
 
     base_stats.loc[0] = [int(base_stats_raw[1].get_text()),
                          int(base_stats_raw[2].get_text()),
