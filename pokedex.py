@@ -16,19 +16,22 @@ except ModuleNotFoundError:
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--create", 
-                        help = "create a new pokedex and fill it", 
-                        action = "store_true")
-    parser.add_argument("-f", "--fill", 
-                        help = "fill the existing pokedex", 
-                        action = "store_true")
-    parser.add_argument("-l", "--lookup",
-                        help = "look up an entry in the local pokedex",
-                        type = int,
-                        action = "store",
-                        required = False,
-                        metavar = "pokemon_number",
-                        dest = "number")
+    parser.add_argument(
+        "-c", "--create", help="create a new pokedex and fill it", action="store_true"
+    )
+    parser.add_argument(
+        "-f", "--fill", help="fill the existing pokedex", action="store_true"
+    )
+    parser.add_argument(
+        "-l",
+        "--lookup",
+        help="look up an entry in the local pokedex",
+        type=int,
+        action="store",
+        required=False,
+        metavar="pokemon_number",
+        dest="number",
+    )
 
     args = parser.parse_args()
 
@@ -46,32 +49,36 @@ def get_args():
 
 def create_pokedex():
     if os.path.exists("data/pokedex.csv"):
-        choice = input("There's already a pokedex file inside your data folder." \
-                        " If you continue, your file will be overwritten." \
-                        "\nDo you want to continue? (y/n) ")
+        choice = input(
+            "There's already a pokedex file inside your data folder."
+            " If you continue, your file will be overwritten."
+            "\nDo you want to continue? (y/n) "
+        )
         if choice == "y":
             pokelist = scrp.get_pokelist()
-            os.makedirs("data", exist_ok = True)
-            crwl.pokecrawler(pokelist, fill = False, verbose = True)
+            os.makedirs("data", exist_ok=True)
+            crwl.pokecrawler(pokelist, fill=False, verbose=True)
     else:
         pokelist = scrp.get_pokelist()
-        os.makedirs("data", exist_ok = True)
-        crwl.pokecrawler(pokelist, fill = False, verbose = True)
+        os.makedirs("data", exist_ok=True)
+        crwl.pokecrawler(pokelist, fill=False, verbose=True)
 
 
 def fill_pokedex():
     pokelist = scrp.get_pokelist()
     try:
-        current_pokedex = pd.read_csv("data/pokedex.csv", 
-                                    usecols = ["number", "name"],
-                                    dtype = {"number": str})
-        current_pokedex.set_index("number", inplace = True)
+        current_pokedex = pd.read_csv(
+            "data/pokedex.csv", usecols=["number", "name"], dtype={"number": str}
+        )
+        current_pokedex.set_index("number", inplace=True)
 
-        pokelist = pokelist.loc[[(number not in current_pokedex.index) for number in pokelist.index]]
+        pokelist = pokelist.loc[
+            [(number not in current_pokedex.index) for number in pokelist.index]
+        ]
         if len(pokelist) == 0:
             print("Looks like your pokedex is already complete, well done!")
         else:
-            crwl.pokecrawler(pokelist, fill = True, verbose = True)
+            crwl.pokecrawler(pokelist, fill=True, verbose=True)
     except FileNotFoundError:
         print("No pokedex available to fill, try creating one by using the -c option")
 
@@ -79,15 +86,32 @@ def fill_pokedex():
 def check_pokedex(number):
     if number > 0:
         try:
-            columns = pd.read_csv("data/pokedex.csv", nrows = 0).columns
-            pokedata = pd.read_csv("data/pokedex.csv", skiprows = number - 1, nrows = 1)
+            columns = pd.read_csv("data/pokedex.csv", nrows=0).columns
+            pokedata = pd.read_csv("data/pokedex.csv", skiprows=number - 1, nrows=1)
             pokedata.columns = columns
-            pokedata.set_index("number", inplace = True)
-            pokedata["type"] = "/".join([pokedata["type1"].values[0], pokedata["type2"].values[0]])
-            print(pokedata[['generation', 'name', 'type', 'HP', 'attack', 
-                            'defense', 'sp_attack', 'sp_defense', 'speed']])
+            pokedata.set_index("number", inplace=True)
+            pokedata["type"] = "/".join(
+                [pokedata["type1"].values[0], pokedata["type2"].values[0]]
+            )
+            print(
+                pokedata[
+                    [
+                        "generation",
+                        "name",
+                        "type",
+                        "HP",
+                        "attack",
+                        "defense",
+                        "sp_attack",
+                        "sp_defense",
+                        "speed",
+                    ]
+                ]
+            )
         except FileNotFoundError:
-            print("No pokedex available to fill, try creating one by using the -c option")
+            print(
+                "No pokedex available to fill, try creating one by using the -c option"
+            )
         except pd.errors.EmptyDataError:
             print("Entry not found in your pokedex")
     else:
@@ -96,7 +120,7 @@ def check_pokedex(number):
 
 if __name__ == "__main__":
     args = get_args()
-    
+
     if args.fill is True:
         fill_pokedex()
     elif args.create is True:
