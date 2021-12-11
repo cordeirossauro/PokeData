@@ -93,7 +93,7 @@ def abilities_extractor(soup):
     abilities = abilities_raw[0].get_text().split(":")[1].split("-")
     abilities = [ability.strip() for ability in abilities]
 
-    abilities_df = pd.DataFrame(columns=["Abilities"])
+    abilities_df = pd.DataFrame(columns=["abilities"])
     abilities_df.loc[0] = [abilities]
 
     return abilities_df
