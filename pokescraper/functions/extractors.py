@@ -167,46 +167,6 @@ def base_stats_extractor(soup):
     return base_stats
 
 
-def max_stats_extractor(soup):
-    header_ind = find_string(soup, "Beneficial Nature", "tr")
-
-    max_stats_raw = soup.find_all("tr")[header_ind[0] + 1].find_all("td")
-
-    max_stats = pd.DataFrame(
-        columns=[
-            "max_HP_low",
-            "max_HP_high",
-            "max_attack_low",
-            "max_attack_high",
-            "max_defense_low",
-            "max_defense_high",
-            "max_sp_attack_low",
-            "max_sp_attack_high",
-            "max_sp_defense_low",
-            "max_sp_defense_high",
-            "max_speed_low",
-            "max_speed_high",
-        ]
-    )
-
-    max_stats.loc[0] = [
-        int(max_stats_raw[1].get_text().split("-")[0]),
-        int(max_stats_raw[1].get_text().split("-")[1]),
-        int(max_stats_raw[2].get_text().split("-")[0]),
-        int(max_stats_raw[2].get_text().split("-")[1]),
-        int(max_stats_raw[3].get_text().split("-")[0]),
-        int(max_stats_raw[3].get_text().split("-")[1]),
-        int(max_stats_raw[4].get_text().split("-")[0]),
-        int(max_stats_raw[4].get_text().split("-")[1]),
-        int(max_stats_raw[5].get_text().split("-")[0]),
-        int(max_stats_raw[5].get_text().split("-")[1]),
-        int(max_stats_raw[6].get_text().split("-")[0]),
-        int(max_stats_raw[6].get_text().split("-")[1]),
-    ]
-
-    return max_stats
-
-
 def full_extractor(soup):
     gen_inf = gen_inf_extractor(soup)
     phys_inf = phys_inf_extractor(soup)
@@ -214,9 +174,7 @@ def full_extractor(soup):
     abilities = abilities_extractor(soup)
     weaknesses = weaknesses_extractor(soup)
     base_stats = base_stats_extractor(soup)
-    max_stats = max_stats_extractor(soup)
 
     return pd.concat(
-        [gen_inf, phys_inf, ment_inf, abilities, weaknesses, base_stats, max_stats],
-        axis=1,
+        [gen_inf, phys_inf, ment_inf, abilities, weaknesses, base_stats], axis=1
     )
