@@ -1,7 +1,7 @@
 This repo is divided into two different parts, each one with its individual folder:
 
-- pokescraper: A web scraper designed to get data for all the pokemon available at [serebii.net](https://serebii.net/) and store it locally in a .csv file;
-- data analysis: Basic Exploratory Data Analysis of the pokemon data obtained using the pokescraper.
+- **pokescraper**: A web scraper designed to get data for all the pokemon available at [serebii.net](https://serebii.net/) and store it locally in a .csv file;
+- **data analysis**: Basic Exploratory Data Analysis of the pokemon data obtained using the pokescraper.
 
 # pokescraper
 
