@@ -3,6 +3,12 @@ This repo is divided into two different parts, each one with its individual fold
 - **pokescraper**: A web scraper designed to get data for all the pokemon available at [serebii.net](https://serebii.net/) and store it locally in a .csv file;
 - **data analysis**: Basic Exploratory Data Analysis of the pokemon data obtained using the pokescraper.
 
+To install all the required libraries, run the following command inside the Pokedata/ directory:
+
+```
+pip3 install -r requirements.txt
+```
+
 # pokescraper
 
 To use the scraper, navigate to the pokescraper folder and run the pokedex.py file using the command:
